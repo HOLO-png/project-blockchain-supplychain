@@ -120,8 +120,6 @@ class App extends Component {
             if (image.name) {
                 media = await imageUpload(image);
             }
-            console.log(media);
-
             try {
                 await this.itemManager.methods
                     .updateItem(
@@ -284,8 +282,6 @@ class App extends Component {
     };
 
     render() {
-        console.log(this.state.listItems);
-
         if (!this.state.loaded) {
             return <div>Loading Web3, accounts, and contract...</div>;
         }
