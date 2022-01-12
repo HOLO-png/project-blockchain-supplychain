@@ -7,7 +7,8 @@ const cors = require('cors');
 const cookieParser = require('cookie-parser');
 
 const userRoute = require('./routes/users.js');
-// const authRoute = require('./routes/auth.js');
+const authRoute = require('./routes/auth.js');
+const productsRoute = require('./routes/products.js');
 
 const app = express();
 require('dotenv').config();
@@ -30,8 +31,9 @@ app.use(morgan('common'));
 app.use(cors({ origin: true, credentials: true }));
 
 //mail sender detail
-// app.use('/api/auth', authRoute);
+app.use('/api/auth', authRoute);
 app.use('/api/users', userRoute);
+app.use('/api/products', productsRoute);
 
 const PORT = process.env.PORT;
 

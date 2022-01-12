@@ -49,6 +49,14 @@ const UserSchema = new mongoose.Schema(
         from: {
             type: String,
             max: 50,
+            default: '',
+        },
+        wallet: {
+            type: String,
+            required: true,
+        },
+        Date: {
+            type: Date,
         },
         role: {
             type: Number,

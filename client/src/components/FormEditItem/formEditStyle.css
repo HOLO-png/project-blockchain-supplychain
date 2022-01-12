@@ -6,10 +6,21 @@
     padding: 20px;
     width: 320px;
     position: fixed;
-    top: 18%;
+    top: 0%;
+    opacity: 0;
+    visibility: hidden;
     left: 40%;
+    z-index: 999; 
+    transition: 0.25s;
   }
   
+  .form-edit-item.active {
+    top: 14%;
+    opacity: 1;
+    visibility: visible;
+
+  }
+
   .ic0 {
     height: 190px !important;
   }

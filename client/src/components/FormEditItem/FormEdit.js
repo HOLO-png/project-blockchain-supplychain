@@ -10,10 +10,14 @@ function FormEdit({
     productName,
     productPrice,
     image,
+    isFormEditItem,
 }) {
-    console.log(image);
     return (
-        <div className="form-edit-item">
+        <div
+            className={
+                !isFormEditItem ? `form-edit-item` : 'form-edit-item active'
+            }
+        >
             <div className="title">Edit Product</div>
             <div className="input-upload">
                 <div className="input-container ic0">
