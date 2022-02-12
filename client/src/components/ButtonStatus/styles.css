@@ -1,0 +1,9 @@
+.button-status-table {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 3em;
+}
+button.button-status-table__item {
+    background: #c6c6c6;
+}

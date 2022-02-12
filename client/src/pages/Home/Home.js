@@ -1,7 +1,4 @@
 import React, { Component } from 'react';
-import ItemManagerContract from '../../contracts/ItemManager.json';
-import ItemContract from '../../contracts/Item.json';
-import ListItem from '../../components/Item/ListItem';
 import FormEdit from '../../components/FormEditItem/FormEdit';
 
 import './styles.css';
@@ -21,6 +18,10 @@ import {
     updateStatusProductApi,
 } from '../../redux/reducers/productReducer';
 import TableProduct from '../../components/TableProduct';
+import CardInfo from '../../components/CardInfo';
+import ButtonStatus from '../../components/ButtonStatus';
+import { getUsersApi } from '../../redux/reducers/userReducer';
+import { handleGetOrderUserAll } from '../../redux/reducers/orderReducer';
 
 class Home extends Component {
     state = {
@@ -30,6 +31,8 @@ class Home extends Component {
         productEdit: null,
         isEdit: false,
         image: '',
+        listItems: [],
+        statusTable: 'Store',
     };
     //=============================
 
@@ -46,7 +49,7 @@ class Home extends Component {
 
     handleSubmitFormEdit = async () => {
         this.props.toggleLoadingTrue();
-        if (this.props.web3) {
+        if (this.props.itemManager) {
             if (this.state.isEdit) {
                 const { productName, productPrice, productEdit, image } =
                     this.state;
@@ -54,17 +57,16 @@ class Home extends Component {
                 if (image.name) {
                     media = await imageUpload(image);
                 }
-                console.log(productName, productPrice, productEdit, image);
 
                 try {
-                    await this.itemManager.methods
+                    await this.props.itemManager.methods
                         .updateItem(
                             productEdit.indexProduct,
                             productName,
                             media,
                             +productPrice,
                         )
-                        .send({ from: this.accounts[0] });
+                        .send({ from: this.props.account });
                     this.props.handleUpdateProductApi({
                         ...productEdit,
                         thumbnail: media,
@@ -82,20 +84,19 @@ class Home extends Component {
                 if (image) {
                     media = await imageUpload(image);
                 }
+
                 try {
                     const { productPrice, productName } = this.state;
 
-                    console.log(productName, media, +productPrice);
-
-                    let result = await this.itemManager.methods
+                    let result = await this.props.itemManager.methods
                         .createItem(
                             productName,
                             media,
                             +productPrice,
-                            this.accounts[0],
+                            this.props.account,
                         )
                         .send({
-                            from: this.accounts[0],
+                            from: this.props.account,
                             // gas: 6000000,
                         });
 
@@ -111,7 +112,7 @@ class Home extends Component {
                         price: +productPrice,
                         thumbnail: media,
                         creator: this.props.currentUserId,
-                        addressCreator: this.accounts[0],
+                        addressCreator: this.props.account,
                         addressProduct: address,
                         status: step,
                         indexProduct: +itemIndex,
@@ -134,35 +135,41 @@ class Home extends Component {
 
     handCLickDelivered = async (item) => {
         this.props.toggleLoadingTrue();
-        try {
-            await this.itemManager.methods
-                .triggerDelivery(item.indexProduct)
-                .send({ from: this.accounts[0] });
+        if (this.props.itemManager) {
+            try {
+                await this.props.itemManager.methods
+                    .triggerDelivery(item.indexProduct)
+                    .send({ from: this.props.account });
 
-            this.props.handleUpdateStatusProductApi({
-                ...item,
-                status: 2,
-            });
-        } catch (e) {
-            console.log(e);
-            alert('Delivered failed ');
+                this.props.handleUpdateStatusProductApi({
+                    ...item,
+                    status: 2,
+                });
+            } catch (e) {
+                console.log(e);
+                alert('Delivered failed ');
+            }
+            setTimeout(() => {
+                this.props.toggleLoadingFalse();
+            }, 500);
         }
-        setTimeout(() => {
-            this.props.toggleLoadingFalse();
-        }, 500);
     };
 
     handleRemoveItem = async (item) => {
         this.props.toggleLoadingTrue();
-        try {
-            await this.itemManager.methods.removeItem(item.indexProduct).call();
-            this.props.handleDeleteProduct(item);
-        } catch (e) {
-            alert('Delete failed ');
+        if (this.props.itemManager) {
+            try {
+                await this.props.itemManager.methods
+                    .removeItem(item.indexProduct)
+                    .call();
+                this.props.handleDeleteProduct(item);
+            } catch (e) {
+                alert('Delete failed ');
+            }
+            setTimeout(() => {
+                this.props.toggleLoadingFalse();
+            }, 500);
         }
-        setTimeout(() => {
-            this.props.toggleLoadingFalse();
-        }, 500);
     };
 
     //============================
@@ -202,67 +209,52 @@ class Home extends Component {
             isFormEditItem: !this.state.isFormEditItem,
         });
     };
-
     componentDidMount = async () => {
+        this.props.toggleLoadingTrue();
+        this.props.handleGetUserApi();
         this.props.handleGetProductApi(this.props.user.wallet);
-        if (this.props.web3) {
-            this.accounts = await this.props.web3.eth.getAccounts();
-            this.networkId = await this.props.web3.eth.net.getId();
-            this.itemManager = new this.props.web3.eth.Contract(
-                ItemManagerContract.abi,
-                ItemManagerContract.networks[this.networkId] &&
-                    ItemManagerContract.networks[this.networkId].address,
-            );
+        this.props.handleGetOrderUserAllApi();
+        setTimeout(() => {
+            this.props.toggleLoadingFalse();
+        }, 500);
+        this.setState({ listItems: this.props.products });
+    };
+
+    componentDidUpdate = (nextProps) => {
+        if (nextProps.products !== this.props.products) {
+            this.setState({ listItems: this.props.products });
+        }
+        if (nextProps.users !== this.props.users) {
+            this.setState({ listItems: this.props.users });
         }
     };
 
-    componentDidUpdate = async (nextProps) => {
-        if (nextProps.web3 !== this.props.web3) {
-            if (this.props.web3) {
-                try {
-                    this.web3 = this.props.web3;
+    handleShowItemUser = () => {};
 
-                    this.accounts = await this.web3.eth.getAccounts();
+    handleConvertTable = (statusBtn) => {
+        switch (statusBtn) {
+            case 'Order':
+                this.setState({
+                    listItems: this.props.orders,
+                    statusTable: statusBtn,
+                });
 
-                    this.networkId = await this.web3.eth.net.getId();
-
-                    this.itemManager = new this.web3.eth.Contract(
-                        ItemManagerContract.abi,
-                        ItemManagerContract.networks[this.networkId] &&
-                            ItemManagerContract.networks[this.networkId]
-                                .address,
-                    );
-                } catch (error) {
-                    alert(
-                        `Failed to load web3, accounts, or contract. Check console for details.`,
-                    );
-                    console.error(error);
-                }
-            }
+                break;
+            case 'User':
+                this.setState({
+                    listItems: this.props.users,
+                    statusTable: statusBtn,
+                });
+                break;
+            case 'Store':
+                this.setState({
+                    listItems: this.props.products,
+                    statusTable: statusBtn,
+                });
+                break;
+            default:
+                break;
         }
-
-        !this.props.products &&
-            setTimeout(() => {
-                this.props.toggleLoadingFalse();
-            }, 500);
-    };
-
-    handleShowItemUser = () => {
-        // const { listItems } = this.state;
-        // if (listItems.length) {
-        //     if (this.accounts[0]) {
-        //         const newListItemUser = listItems.filter((item) => {
-        //             return item.ownerAddress === this.accounts[0];
-        //         });
-        //         this.setState({
-        //             listItems: newListItemUser,
-        //         });
-        //     } else {
-        //         toast.warning('Not connected to wallet!');
-        //     }
-        // } else {
-        //     toast.warning('List item is empty!');
-        // }
     };
 
     render() {
@@ -279,11 +271,34 @@ class Home extends Component {
                         </button>
                     </div>
                 </div>
+                <div className="card-info">
+                    <CardInfo
+                        icon="fas fa-shopping-bag"
+                        data={
+                            this.props.products ? this.props.products.length : 0
+                        }
+                        color="#3cb7d4"
+                        title="Purchases"
+                    />
+                    <CardInfo
+                        icon="fas fa-user"
+                        data={this.props.users ? this.props.users.length : 0}
+                        color="#eaa539"
+                        title="User"
+                    />
+                </div>
+                <div className="button-status-table">
+                    <ButtonStatus
+                        icon="fas fa-store"
+                        handleConvertTable={this.handleConvertTable}
+                    />
+                </div>
                 <TableProduct
+                    statusTable={this.state.statusTable}
                     handCLickDelivered={this.handCLickDelivered}
                     handleRemoveItem={this.handleRemoveItem}
                     handleEditItem={this.handleEditItem}
-                    listItems={this.props.products ? this.props.products : []}
+                    listItems={this.state.listItems ? this.state.listItems : []}
                 />
                 <FormEdit
                     handleHiddenFormEdit={this.handleHiddenFormEdit}
@@ -308,6 +323,8 @@ const mapDispatchToProps = (dispatch) => {
         handleUpdateStatusProductApi: (data) =>
             dispatch(updateStatusProductApi(data)),
         handleDeleteProduct: (data) => dispatch(deleteProductApi(data)),
+        handleGetUserApi: () => dispatch(getUsersApi()),
+        handleGetOrderUserAllApi: () => dispatch(handleGetOrderUserAll()),
     };
 };
 

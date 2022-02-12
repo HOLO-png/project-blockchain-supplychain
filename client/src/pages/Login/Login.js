@@ -6,15 +6,17 @@ import { toast } from 'react-toastify';
 import Signup from '../../components/Signup';
 import Signin from '../../components/Sigin';
 import { override } from '../../utils/loadingStyle.js';
-import { Route, Link, useParams, useHistory } from 'react-router-dom';
+import { Route, Link, useParams, useHistory, Redirect } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import {
     authSelector,
     fetchSigninAction,
     fetchSignupAction,
 } from '../../redux/reducers/authReducer';
-import { setWeb3, web3Selector } from '../../redux/reducers/web3Reducer';
-import getWeb3 from '../../getWeb3';
+import {
+    setLoadingFalse,
+    setLoadingTrue,
+} from '../../redux/reducers/loadingReducer';
 
 export default function Login({ addressUser }) {
     const { path } = useParams();
@@ -34,24 +36,27 @@ export default function Login({ addressUser }) {
         } else {
             toast.error('Not connected to wallet');
         }
+        setTimeout(() => {
+            dispatch(setLoadingFalse());
+        }, 500);
     };
 
     const handleLoginSignin = async (val) => {
+        dispatch(setLoadingTrue());
+
         if (addressUser) {
             dispatch(fetchSigninAction({ ...val, wallet: addressUser }));
         } else {
             toast.error('Not connected to wallet');
         }
+        setTimeout(() => {
+            dispatch(setLoadingFalse());
+        }, 500);
     };
-
-    useEffect(() => {
-        if (auth.user) {
-            history.push('/');
-        }
-    }, [auth.user]);
 
     return (
         <>
+            {auth.user && auth.tokenAuth ? <Redirect exact to="/" /> : ''}
             <div className="login">
                 <div className="form">
                     <div
@@ -62,10 +67,16 @@ export default function Login({ addressUser }) {
                         }
                     >
                         <Route path="/login/sign-up">
-                            <Signup onSubmit={handleLoginSignup} />
+                            <Signup
+                                onSubmit={handleLoginSignup}
+                                addressUser={addressUser}
+                            />
                         </Route>
                         <Route path="/login/sign-in">
-                            <Signin onSubmit={handleLoginSignin} />
+                            <Signin
+                                onSubmit={handleLoginSignin}
+                                addressUser={addressUser}
+                            />
                         </Route>
 
                         <div className="form__overlay-container">

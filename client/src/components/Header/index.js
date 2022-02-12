@@ -42,17 +42,23 @@ function Header({ user }) {
                 }
             >
                 <Link
-                    to="/dashboard"
+                    to={`${user.isAdmin ? '/dashboard' : '/cart'}`}
                     className="menu-content"
                     onClick={handleShowUserLogin}
                 >
-                    <i className="fad fa-tachometer-slow"></i>
-                    <p className="menu-title">Dashboard</p>
+                    {user.isAdmin ? (
+                        <i className="fad fa-tachometer-slow"></i>
+                    ) : (
+                        <i className="fad fa-cart-plus"></i>
+                    )}
+                    <p className="menu-title">
+                        {user.isAdmin ? 'Dashboard' : 'Cart'}
+                    </p>
                 </Link>
-                <div className="menu-content">
+                <Link to="/account" className="menu-content">
                     <i className="fad fa-user-circle"></i>
                     <p className="menu-title">Account</p>
-                </div>
+                </Link>
                 <Link
                     className="menu-content"
                     to="/login/sign-in"

@@ -24,15 +24,30 @@ const product = {
             return res.status(500).json({ msg: err.message });
         }
     },
+    getProductsToOrder: async (req, res) => {
+        try {
+            const { productsId } = req.body;
+
+            const products = await Promise.all(
+                productsId.map((productId) => {
+                    return Product.findOne({ _id: productId });
+                }),
+            );
+            return res.status(200).json(products);
+        } catch (err) {
+            console.log(err);
+            return res.status(500).json({ msg: err.message });
+        }
+    },
     updateProduct: async (req, res) => {
         try {
             const product = await Product.findById(req.params.id);
+
             if (
                 product.creator === req.user.id &&
                 product.addressCreator === req.user.wallet
             ) {
                 const newProduct = await product.updateOne({ $set: req.body });
-
                 res.status(200).json(newProduct);
             } else {
                 throw 500;
@@ -75,6 +90,34 @@ const product = {
             );
 
             res.status(200).json(products);
+        } catch (err) {
+            console.log(err);
+            res.status(500).json(err);
+        }
+    },
+    getProduct: async (req, res) => {
+        try {
+            const { addressItem } = req.params;
+            const products = await Product.find({
+                addressProduct: addressItem,
+            });
+            res.status(200).json(products);
+        } catch (err) {
+            console.log(err);
+            res.status(500).json(err);
+        }
+    },
+    updateProductsToCart: async (req, res) => {
+        try {
+            const { productsId, status } = req.body;
+            console.log(productsId, status);
+
+            productsId.forEach(async (productId) => {
+                const product = await Product.findOne({ _id: productId });
+                product.status = status;
+                await product.save();
+            });
+            res.status(200).json({ productsId, status });
         } catch (err) {
             console.log(err);
             res.status(500).json(err);

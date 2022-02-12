@@ -39,18 +39,34 @@ export const getProductApi = createAsyncThunk(
     },
 );
 
-export const updateProductApi = createAsyncThunk(
-    'updateProductApi/updateProductApiFetch',
-    async (data) => {
+export const getProductItemApi = createAsyncThunk(
+    'getProductItem/getProductItemFetch',
+    async (address) => {
         try {
-            await axios.put(`/products/${data.data._id}`, data.data, {
-                headers: { Authorization: data.token },
-            });
-            toast.success(`Updated success `);
-            return data.data;
+            const res = await axios.get(`/products/item/${address}`);
+            res.data.length && toast.success(`Get success product list`);
+            return res.data;
         } catch (err) {
             console.log(err);
             toast.error(`${err.message} 😓`);
+        }
+    },
+);
+
+export const updateProductApi = createAsyncThunk(
+    'updateProductApi/updateProductApiFetch',
+    async (data) => {
+        if (data.data._id) {
+            try {
+                await axios.put(`/products/${data.data._id}`, data.data, {
+                    headers: { Authorization: data.token },
+                });
+                toast.success(`Updated success `);
+                return data.data;
+            } catch (err) {
+                console.log(err);
+                toast.error(`${err.message} 😓`);
+            }
         }
     },
 );
@@ -90,16 +106,37 @@ export const deleteProductApi = createAsyncThunk(
 export const getUserAllProductApi = createAsyncThunk(
     'getUserAllProductApi/getUserAllProductApiFetch',
     async (user) => {
-        try {
-            const res = await axios.get(`/products/${user.wallet}`);
-            res.data.length && toast.success(`Get success product list`);
-            return res.data;
-        } catch (err) {
-            console.log(err);
-            toast.error(`${err.message} 😓`);
+        if (user) {
+            try {
+                const res = await axios.get(`/products/${user.wallet}`);
+                res.data.length && toast.success(`Get success product list`);
+                return res.data;
+            } catch (err) {
+                console.log(err);
+                toast.error(`${err.message} 😓`);
+            }
         }
     },
 );
+
+export const updateStatusProductOrder = createAsyncThunk(
+    'updateStatusProductOrder/updateStatusProductOrderFetch',
+    async (data) => {
+        if (data) {
+            try {
+                const res = await axios.patch(`/products`, {
+                    productsId: data.productsId,
+                    status: data.status,
+                });
+                return res.data;
+            } catch (err) {
+                console.log(err);
+                toast.error(`${err.message} 😓`);
+            }
+        }
+    },
+);
+
 const productSlice = createSlice({
     name: 'product',
     initialState: {
@@ -111,8 +148,11 @@ const productSlice = createSlice({
         [createProductApi.pending]: (state, action) => {},
         [createProductApi.fulfilled]: (state, action) => {
             const product = action.payload;
-            if (product) {
-                state.product.push(action.payload);
+            if (state.product) {
+                state.product.push(product);
+            } else {
+                state.product = [];
+                state.product.push(product);
             }
         },
         [createProductApi.rejected]: (state, action) => {},
@@ -135,7 +175,6 @@ const productSlice = createSlice({
                         : item;
                 });
             }
-            console.log(state.product);
         },
         [updateProductApi.rejected]: (state, action) => {
             toast.error('you can update only your product');
@@ -173,12 +212,49 @@ const productSlice = createSlice({
         },
         [deleteProductApi.rejected]: (state, action) => {},
 
-        // // //update product
+        [getProductItemApi.pending]: (state, action) => {},
+        [getProductItemApi.fulfilled]: (state, action) => {
+            const product = action.payload[0];
+            let isActive = state.product.find(
+                (p) => p.addressProduct === product.addressProduct,
+            );
+
+            if (product) {
+                if (!isActive) {
+                    if (!state.product) {
+                        const products = [];
+                        state.product = products.push(product);
+                    } else {
+                        state.product.push(product);
+                    }
+                }
+            }
+        },
+        [getProductItemApi.rejected]: (state, action) => {},
+
+        //update product
         [getUserAllProductApi.pending]: (state, action) => {},
         [getUserAllProductApi.fulfilled]: (state, action) => {
             state.product = action.payload;
         },
         [getUserAllProductApi.rejected]: (state, action) => {},
+
+        //update product
+        [updateStatusProductOrder.pending]: (state, action) => {},
+        [updateStatusProductOrder.fulfilled]: (state, action) => {
+            if (action.payload) {
+                if (state.product) {
+                    state.product = state.product.map((p) =>
+                        action.payload.productsId.map((productId) => {
+                            if (p._id === productId) {
+                                p.status = action.payload.status;
+                            }
+                        }),
+                    );
+                }
+            }
+        },
+        [updateStatusProductOrder.rejected]: (state, action) => {},
     },
 });
 

@@ -43,13 +43,17 @@ export default function ListItem(props) {
             </header>
 
             <div id="list" className="container">
-                {props.listItems.map((item) => (
-                    <Item
-                        handCLickPaid={props.handCLickPaid}
-                        item={item}
-                        key={item._id}
-                    />
-                ))}
+                {props.listItems &&
+                    props.listItems.map((item) => (
+                        <Item
+                            handCLickPaid={props.handCLickPaid}
+                            handleAddToCart={props.handleAddToCart}
+                            item={item}
+                            key={item._id}
+                            user={props.user}
+                            account={props.account}
+                        />
+                    ))}
             </div>
         </>
     );

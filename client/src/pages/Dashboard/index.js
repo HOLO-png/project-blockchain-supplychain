@@ -14,8 +14,9 @@ import {
     setLoadingTrue,
 } from '../../redux/reducers/loadingReducer';
 import ItemManagerContract from '../../contracts/ItemManager.json';
+import { handleAddProductToCart } from '../../redux/reducers/cartReducer';
 
-function Dashboard({ web3, user, products }) {
+function Dashboard({ web3, user, products, cart, account }) {
     const dispatch = useDispatch();
     const [web3Data, setWeb3Data] = useState({
         web3: null,
@@ -80,11 +81,22 @@ function Dashboard({ web3, user, products }) {
         }, 500);
     };
 
+    const handleAddToCart = (product) => {
+        dispatch(setLoadingTrue());
+        dispatch(handleAddProductToCart({ cart, product }));
+        setTimeout(() => {
+            dispatch(setLoadingFalse());
+        }, 500);
+    };
+
     return (
         <>
             <ListItem
                 listItems={products ? products : []}
                 handCLickPaid={handCLickPaid}
+                handleAddToCart={handleAddToCart}
+                account={account}
+                user={user}
             />
         </>
     );

@@ -13,12 +13,24 @@ export default function ListItem(props) {
                 <p className="product-address">{props.item.addressProduct}</p>
                 <p className="product-price">{props.item.price}</p>
                 <div className="btn-action">
-                    <button
-                        onClick={() => props.handCLickPaid(props.item)}
-                        className="item-paid--btn"
-                    >
-                        Buy
-                    </button>
+                    {!props.user.isAdmin && (
+                        <>
+                            <button
+                                onClick={() => props.handCLickPaid(props.item)}
+                                className="item-paid--btn"
+                            >
+                                Buy
+                            </button>
+                            <button
+                                onClick={() =>
+                                    props.handleAddToCart(props.item)
+                                }
+                                className="item-delivery--btn"
+                            >
+                                Add To Cart
+                            </button>
+                        </>
+                    )}
                 </div>
                 <div className="user">
                     <img

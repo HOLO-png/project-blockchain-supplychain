@@ -52,20 +52,19 @@ function Signup(props) {
                             <h1 className="form__signin-title">
                                 Create Account
                             </h1>
-                            <div className="form__social-container">
-                                <a
-                                    className="form__social"
-                                    // onClick={handleFbLogin}
-                                >
-                                    <i className="fab fa-facebook-f" />
-                                </a>
-                                <a
-                                    className="form__social"
-                                    // onClick={handleGgLogin}
-                                >
-                                    <i className="fab fa-google-plus-g" />
-                                </a>
-                            </div>
+                            {props.addressUser && (
+                                <div className="form__social-container">
+                                    <div className="form__social-container-metamask-logo">
+                                        <img
+                                            className="form__social-container-metamask-img"
+                                            src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQGI4svJ2xCNNVYovBAz7YAYZfDCVGZi-HCVQ&usqp=CAU"
+                                        />
+                                    </div>
+                                    <span className="form__social-container-metamask-address">
+                                        {props.addressUser}
+                                    </span>
+                                </div>
+                            )}
                             <span>or use your email for registration</span>
                             <FastField
                                 name="name"

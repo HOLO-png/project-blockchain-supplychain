@@ -43,7 +43,19 @@ function Signin(props) {
                     return (
                         <Form>
                             <h1 className="form__title">Sign in</h1>
-                            <div className="form__social-container"></div>
+                            {props.addressUser && (
+                                <div className="form__social-container">
+                                    <div className="form__social-container-metamask-logo">
+                                        <img
+                                            className="form__social-container-metamask-img"
+                                            src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQGI4svJ2xCNNVYovBAz7YAYZfDCVGZi-HCVQ&usqp=CAU"
+                                        />
+                                    </div>
+                                    <span className="form__social-container-metamask-address">
+                                        {props.addressUser}
+                                    </span>
+                                </div>
+                            )}
                             <span>or use your account</span>
                             <FastField
                                 name="email"

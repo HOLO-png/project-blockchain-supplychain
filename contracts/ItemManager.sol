@@ -22,12 +22,10 @@ contract ItemManager is Ownable{
         return itemIndex;
     }
 
-    event SupplyChainStep(uint _itemIndex, uint _step, address _itemAddress);
+    event SupplyChainStep(uint _itemIndex, string _identifier, string _image, int _itemPrice, uint _step, address _itemAddress);
     
     function createItem(string memory _identifier, string memory _image, uint _itemPrice, address _ownerCreate) public onlyOwner{
-
         Item item = new Item(this, _itemPrice, itemIndex, _ownerCreate);
-
         items[itemIndex]._item = item;
         items[itemIndex]._identifier = _identifier;
         items[itemIndex]._image = _image;
@@ -35,7 +33,7 @@ contract ItemManager is Ownable{
         items[itemIndex]._itemAddress = address(item);
         items[itemIndex]._state = SupplyChainState.Created;
 
-        emit SupplyChainStep(itemIndex, uint(items[itemIndex]._state), address(item));
+        emit SupplyChainStep(itemIndex, string(items[itemIndex]._identifier), string(items[itemIndex]._image), int(items[itemIndex]._itemPrice), uint(items[itemIndex]._state), address(item));
         itemIndex ++;
 
     }
@@ -43,29 +41,30 @@ contract ItemManager is Ownable{
     function triggerPayment(uint _itemIndex) public payable{
         require(items[_itemIndex]._itemPrice == msg.value, "Only full payments accepted!");
         require(items[_itemIndex]._state == SupplyChainState.Created, "Item is further in the chain!");
+
         items[_itemIndex]._state = SupplyChainState.Paided;
-        emit SupplyChainStep(_itemIndex, uint(items[_itemIndex]._state), address(items[_itemIndex]._item));
+         emit SupplyChainStep(itemIndex, string(items[itemIndex]._identifier), string(items[itemIndex]._image), int(items[itemIndex]._itemPrice), uint(items[itemIndex]._state), address(items[_itemIndex]._item));
     
     }
 
     function triggerDelivery(uint _itemIndex)public onlyOwner{        
         require(items[_itemIndex]._state == SupplyChainState.Paided, "Item is further in the chain!");
         items[_itemIndex]._state = SupplyChainState.Delivered;
-        emit SupplyChainStep(_itemIndex, uint(items[_itemIndex]._state), address(items[_itemIndex]._item));
+        emit SupplyChainStep(itemIndex, string(items[itemIndex]._identifier), string(items[itemIndex]._image), int(items[itemIndex]._itemPrice), uint(items[itemIndex]._state), address(items[_itemIndex]._item));
     }
 
     function removeItem(uint _itemIndex) public onlyOwner {
         require(items[_itemIndex]._state == SupplyChainState.Delivered, "Item not eligible to delete!");
         delete items[_itemIndex];
-        emit SupplyChainStep(_itemIndex, uint(items[_itemIndex]._state), address(items[_itemIndex]._item));
+        emit SupplyChainStep(itemIndex, string(items[itemIndex]._identifier), string(items[itemIndex]._image), int(items[itemIndex]._itemPrice), uint(items[itemIndex]._state), address(items[_itemIndex]._item));
     }
     
-     function updateItem(uint _itemIndex, string memory _identifier,string memory _image, uint _itemPrice ) public onlyOwner {
+     function updateItem(uint _itemIndex, string memory _identifier, string memory _image, uint _itemPrice ) public onlyOwner {
         require(items[_itemIndex]._state == SupplyChainState.Created, "Item not eligible to update!");
         items[_itemIndex]._identifier = _identifier;
         items[_itemIndex]._image = _image;
         items[_itemIndex]._itemPrice = _itemPrice;
         items[_itemIndex]._state = SupplyChainState.Created;
-        emit SupplyChainStep(_itemIndex, uint(items[_itemIndex]._state), address(items[_itemIndex]._item));
+        emit SupplyChainStep(_itemIndex, string(items[itemIndex]._identifier), string(items[itemIndex]._image), int(items[itemIndex]._itemPrice), uint(items[itemIndex]._state), address(items[_itemIndex]._item));
     }
 }
