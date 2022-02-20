@@ -34,15 +34,15 @@ const CartItem = ({
                                             )
                                         }
                                     />{' '}
-                                    x ${cartProduct.product.price}.00
+                                    x {cartProduct.product.price}.00 wei
                                 </p>
                                 <p className="stockStatus"> In Stock</p>
                             </div>
                             <div className="prodTotal cartSection">
                                 <p>
-                                    ${' '}
                                     {cartProduct.product.price *
-                                        cartProduct.qty}
+                                        cartProduct.qty}{' '}
+                                    wei
                                 </p>
                             </div>
                             <div className="cartSection removeWrap">

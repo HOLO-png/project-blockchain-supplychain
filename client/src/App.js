@@ -62,6 +62,8 @@ function App() {
         }
     }, [dispatch, auth.tokenAuth]);
 
+    console.log(orders);
+
     // useEffect(() => {
     //     if (auth.user) {
     //         if (web3) {
@@ -222,7 +224,7 @@ function App() {
                         <Route path="/activate/:activation_token">
                             <ActivationEmail />
                         </Route>
-                        {auth.user.isAdmin && (
+                        {auth.user && auth.user.isAdmin && (
                             <Route path="/dashboard">
                                 {auth.user && auth.tokenAuth ? (
                                     <Dashboard
@@ -239,6 +241,10 @@ function App() {
                                         itemManager={
                                             contracts.itemManager &&
                                             contracts.itemManager
+                                        }
+                                        cartManager={
+                                            contracts.cartManager &&
+                                            contracts.cartManager
                                         }
                                         orders={orders}
                                     />
@@ -275,13 +281,13 @@ function App() {
                             )}
                         </Route>
 
-                        <Route path="*">
+                        {/* <Route path="*">
                             {auth.user && auth.tokenAuth ? (
                                 <NotFound />
                             ) : (
                                 <Redirect exact from="/" to="/login/sign-in" />
                             )}
-                        </Route>
+                        </Route> */}
                     </div>
                 </div>
             </Router>

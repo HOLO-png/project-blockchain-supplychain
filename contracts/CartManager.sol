@@ -30,4 +30,9 @@ contract cartManager {
 
         emit OrderChainStep(string(order[_userAddress]._userId), uint(order[_userAddress]._orderPrice), uint(order[_userAddress]._state), address(order[_userAddress]._userAddress));
     }
+
+    function removeItem(address _userAddress) public {
+        require(order[_userAddress]._state == SupplyChainState.Delivered, "Item not eligible to delete!");
+        delete order[_userAddress];
+        emit OrderChainStep(string(order[_userAddress]._userId), uint(order[_userAddress]._orderPrice), uint(order[_userAddress]._state), address(order[_userAddress]._userAddress));    }
 }

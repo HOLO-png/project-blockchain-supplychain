@@ -27,8 +27,12 @@ export default function Account(userId) {
 
     const handleShowPopup = async (productsId) => {
         dispatch(setLoadingTrue());
-        const res = await axios.get('/products/products-order', { productsId });
+        const res = await axios.post('/products/order/item', {
+            productsId,
+        });
         setProducts(res.data);
+        console.log(res.data);
+
         setIsShowPopup(!isShowPopup);
         dispatch(setLoadingFalse());
     };
@@ -46,8 +50,6 @@ export default function Account(userId) {
             window.removeEventListener('click', null);
         };
     }, []);
-
-    console.log(products);
 
     const handleShowTableProduct = () => {
         if (products) {

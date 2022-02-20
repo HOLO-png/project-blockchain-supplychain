@@ -44,6 +44,41 @@ export const handleGetOrderUserAll = createAsyncThunk(
     },
 );
 
+export const updateStatusOrderApi = createAsyncThunk(
+    'updateStatusOrderApi/updateStatusOrderApiFetch',
+    async (data) => {
+        try {
+            const res = await axios.patch(`/order/${data._id}`, {
+                orderStatus: data.orderStatus,
+            });
+            toast.success(
+                data.orderStatus === 1 ? `Delivery success ` : 'Remove success',
+            );
+
+            return res.data;
+        } catch (err) {
+            console.log(err);
+            toast.error(`${err.message} 😓`);
+        }
+    },
+);
+
+export const deleteOrderProductApi = createAsyncThunk(
+    'deleteOrderProductApi/deleteOrderProductApiFetch',
+    async (data) => {
+        try {
+            const res = await axios.delete(`/order/${data._id}`);
+            toast.success(
+                data.orderStatus === 1 ? `Delivery success ` : 'Remove success',
+            );
+            return res.data;
+        } catch (err) {
+            console.log(err);
+            toast.error(`${err.message} 😓`);
+        }
+    },
+);
+
 const orderSlice = createSlice({
     name: 'order',
     initialState: {
@@ -83,6 +118,29 @@ const orderSlice = createSlice({
             }
         },
         [handleGetOrderUserAll.rejected]: (state, action) => {},
+
+        //fetch activation email
+        [updateStatusOrderApi.pending]: (state, action) => {},
+        [updateStatusOrderApi.fulfilled]: (state, action) => {
+            const order = action.payload;
+
+            state.order = state.order.map((el) => {
+                return el._id === order._id ? order : el;
+            });
+            console.log(state.order);
+        },
+        [updateStatusOrderApi.rejected]: (state, action) => {},
+        //fetch activation email
+        [deleteOrderProductApi.pending]: (state, action) => {},
+        [deleteOrderProductApi.fulfilled]: (state, action) => {
+            const order = action.payload;
+            if (order) {
+                state.order = state.order.filter(function (item) {
+                    return item._id !== action.payload._id;
+                });
+            }
+        },
+        [deleteOrderProductApi.rejected]: (state, action) => {},
     },
 });
 

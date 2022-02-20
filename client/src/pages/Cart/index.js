@@ -41,7 +41,9 @@ function Cart({ cart, user, cartManager, account }) {
     };
 
     const handleChangeInputAmount = (cartProduct, amount) => {
-        if (cartProduct.qty !== +amount) {
+        console.log(cartProduct.qty !== amount);
+
+        if (cartProduct.qty !== amount) {
             dispatch(setLoadingTrue());
             dispatch(
                 handleUpdateAmountProductToCart({
@@ -62,6 +64,7 @@ function Cart({ cart, user, cartManager, account }) {
             cart.cart.items.forEach((item) => {
                 productsId.push(item.productId);
             });
+
             let result = await cartManager.methods
                 .createOrder(cart.userId, cart.cart.totalPrice + 9, account)
                 .send({
@@ -134,21 +137,21 @@ function Cart({ cart, user, cartManager, account }) {
                             <li className="totalRow">
                                 <span className="label">Subtotal</span>
                                 <span className="value">
-                                    ${cart && cart.cart.totalPrice}.00
+                                    wei{cart && cart.cart.totalPrice}.00
                                 </span>
                             </li>
                             <li className="totalRow">
                                 <span className="label">Shipping</span>
-                                <span className="value">$5.00</span>
+                                <span className="value">wei5.00</span>
                             </li>
                             <li className="totalRow">
                                 <span className="label">Tax</span>
-                                <span className="value">$4.00</span>
+                                <span className="value">wei4.00</span>
                             </li>
                             <li className="totalRow final">
                                 <span className="label">Total</span>
                                 <span className="value">
-                                    ${cart && cart.cart.totalPrice + 9}.00
+                                    wei{cart && cart.cart.totalPrice + 9}.00
                                 </span>
                             </li>
                             <li className="totalRow">

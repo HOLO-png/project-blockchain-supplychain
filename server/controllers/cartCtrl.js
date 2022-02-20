@@ -70,17 +70,19 @@ const cartCtrl = {
             const arrayCart = [];
             const cartProducts = await Promise.all(
                 cartUser.cart.items.map((product) => {
-                    return Product.find({ _id: product.productId });
+                    return Product.findOne({ _id: product.productId });
                 }),
             );
 
             cartProducts.forEach((cartProduct) => {
                 cartUser.cart.items.forEach((product) => {
-                    if (cartProduct[0]._id.toString() === product.productId) {
-                        arrayCart.push({
-                            product: cartProduct[0],
-                            qty: product.qty,
-                        });
+                    if (cartProduct) {
+                        if (cartProduct._id.toString() === product.productId) {
+                            arrayCart.push({
+                                product: cartProduct,
+                                qty: product.qty,
+                            });
+                        }
                     }
                 });
             });

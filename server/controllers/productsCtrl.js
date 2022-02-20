@@ -27,13 +27,16 @@ const product = {
     getProductsToOrder: async (req, res) => {
         try {
             const { productsId } = req.body;
+            console.log(req.body);
 
-            const products = await Promise.all(
-                productsId.map((productId) => {
-                    return Product.findOne({ _id: productId });
-                }),
-            );
-            return res.status(200).json(products);
+            if (productsId) {
+                const products = await Promise.all(
+                    productsId.map((productId) => {
+                        return Product.findOne({ _id: productId });
+                    }),
+                );
+                return res.status(200).json(products);
+            }
         } catch (err) {
             console.log(err);
             return res.status(500).json({ msg: err.message });

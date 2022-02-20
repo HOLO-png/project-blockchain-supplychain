@@ -21,7 +21,11 @@ import TableProduct from '../../components/TableProduct';
 import CardInfo from '../../components/CardInfo';
 import ButtonStatus from '../../components/ButtonStatus';
 import { getUsersApi } from '../../redux/reducers/userReducer';
-import { handleGetOrderUserAll } from '../../redux/reducers/orderReducer';
+import {
+    deleteOrderProductApi,
+    handleGetOrderUserAll,
+    updateStatusOrderApi,
+} from '../../redux/reducers/orderReducer';
 
 class Home extends Component {
     state = {
@@ -127,48 +131,27 @@ class Home extends Component {
         } else {
             toast.warning('Chưa kết nối với ví');
         }
-        this.props.handleGetProductApi(this.props.user.wallet);
+        // this.props.handleGetProductApi(this.props.user.wallet);
         setTimeout(() => {
             this.props.toggleLoadingFalse();
         }, 500);
     };
 
-    handCLickDelivered = async (item) => {
-        this.props.toggleLoadingTrue();
-        if (this.props.itemManager) {
-            try {
-                await this.props.itemManager.methods
-                    .triggerDelivery(item.indexProduct)
-                    .send({ from: this.props.account });
-
-                this.props.handleUpdateStatusProductApi({
-                    ...item,
-                    status: 2,
-                });
-            } catch (e) {
-                console.log(e);
-                alert('Delivered failed ');
-            }
-            setTimeout(() => {
-                this.props.toggleLoadingFalse();
-            }, 500);
-        }
-    };
-
     handleRemoveItem = async (item) => {
         this.props.toggleLoadingTrue();
-        if (this.props.itemManager) {
+        if (this.props.cartManager) {
             try {
-                await this.props.itemManager.methods
-                    .removeItem(item.indexProduct)
+                await this.props.cartManager.methods
+                    .removeItem(item.userAddress)
                     .call();
+
                 this.props.handleDeleteProduct(item);
+                this.props.handleGetOrderUserAllApi();
             } catch (e) {
+                console.log(e);
                 alert('Delete failed ');
             }
-            setTimeout(() => {
-                this.props.toggleLoadingFalse();
-            }, 500);
+            this.props.toggleLoadingFalse();
         }
     };
 
@@ -209,6 +192,7 @@ class Home extends Component {
             isFormEditItem: !this.state.isFormEditItem,
         });
     };
+
     componentDidMount = async () => {
         this.props.toggleLoadingTrue();
         this.props.handleGetUserApi();
@@ -257,6 +241,30 @@ class Home extends Component {
         }
     };
 
+    handleDeliveryOrder = async (item) => {
+        this.props.toggleLoadingTrue();
+
+        if (this.props.cartManager) {
+            try {
+                await this.props.cartManager.methods
+                    .triggerDelivery(item.userAddress)
+                    .send({ from: this.props.account });
+
+                this.props.updateStatusOrderFetchApi({
+                    ...item,
+                    orderStatus: 1,
+                });
+                this.props.handleGetOrderUserAllApi();
+            } catch (e) {
+                console.log(e);
+                alert('Delivered failed ');
+            }
+            setTimeout(() => {
+                this.props.toggleLoadingFalse();
+            }, 500);
+        }
+    };
+
     render() {
         return (
             <div>
@@ -278,13 +286,13 @@ class Home extends Component {
                             this.props.products ? this.props.products.length : 0
                         }
                         color="#3cb7d4"
-                        title="Purchases"
+                        title="Products"
                     />
                     <CardInfo
                         icon="fas fa-user"
                         data={this.props.users ? this.props.users.length : 0}
                         color="#eaa539"
-                        title="User"
+                        title="Users"
                     />
                 </div>
                 <div className="button-status-table">
@@ -299,6 +307,7 @@ class Home extends Component {
                     handleRemoveItem={this.handleRemoveItem}
                     handleEditItem={this.handleEditItem}
                     listItems={this.state.listItems ? this.state.listItems : []}
+                    handleDeliveryOrder={this.handleDeliveryOrder}
                 />
                 <FormEdit
                     handleHiddenFormEdit={this.handleHiddenFormEdit}
@@ -320,9 +329,9 @@ const mapDispatchToProps = (dispatch) => {
         toggleLoadingFalse: () => dispatch(setLoadingFalse()),
         handleCreateProductApi: (data) => dispatch(createProductApi(data)),
         handleGetProductApi: (wallet) => dispatch(getUserAllProductApi(wallet)),
-        handleUpdateStatusProductApi: (data) =>
-            dispatch(updateStatusProductApi(data)),
-        handleDeleteProduct: (data) => dispatch(deleteProductApi(data)),
+        updateStatusOrderFetchApi: (data) =>
+            dispatch(updateStatusOrderApi(data)),
+        handleDeleteProduct: (data) => dispatch(deleteOrderProductApi(data)),
         handleGetUserApi: () => dispatch(getUsersApi()),
         handleGetOrderUserAllApi: () => dispatch(handleGetOrderUserAll()),
     };

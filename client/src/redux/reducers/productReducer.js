@@ -151,8 +151,9 @@ const productSlice = createSlice({
             if (state.product) {
                 state.product.push(product);
             } else {
-                state.product = [];
-                state.product.push(product);
+                const productArr = [];
+                productArr.push(product);
+                state.product = productArr;
             }
         },
         [createProductApi.rejected]: (state, action) => {},

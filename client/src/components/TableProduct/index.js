@@ -8,6 +8,7 @@ function TableProduct({
     handleRemoveItem,
     handleEditItem,
     statusTable,
+    handleDeliveryOrder,
 }) {
     function convertStep(step) {
         let str = '';
@@ -26,7 +27,6 @@ function TableProduct({
     }
 
     function renderButtonByStep(step, item) {
-        console.log(step);
         switch (step) {
             default:
                 return (
@@ -96,7 +96,7 @@ function TableProduct({
                 return (
                     <span
                         aria-hidden="true"
-                        onClick={() => handCLickDelivered(item)}
+                        onClick={() => handleDeliveryOrder(item)}
                     >
                         <i className="fal fa-truck-container"></i>
                     </span>
@@ -114,8 +114,6 @@ function TableProduct({
     };
 
     const handleRenderTableDashboardBody = () => {
-        console.log(statusTable);
-
         switch (statusTable) {
             case 'Order':
                 return listItems.map((item) => (
@@ -138,7 +136,10 @@ function TableProduct({
                                 data-dismiss="alert"
                                 aria-label="Close"
                             >
-                                {renderButtonByStepOrder(item.status, item)}
+                                {renderButtonByStepOrder(
+                                    item.orderStatus,
+                                    item,
+                                )}
                             </button>
                         </td>
                     </tr>

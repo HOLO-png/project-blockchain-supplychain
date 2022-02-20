@@ -10,7 +10,7 @@ export default function OrderItem({ order, handleShowPopup }) {
                     : 'Đang xử lý đơn hàng'}
             </h2>
             <div className="price">
-                $<div className="big">{order.orderPrice}</div>
+                wei<div className="big">{order.orderPrice}</div>
             </div>
             <p>
                 {order.orderStatus

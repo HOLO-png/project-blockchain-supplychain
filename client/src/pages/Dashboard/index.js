@@ -15,6 +15,7 @@ import {
 } from '../../redux/reducers/loadingReducer';
 import ItemManagerContract from '../../contracts/ItemManager.json';
 import { handleAddProductToCart } from '../../redux/reducers/cartReducer';
+import { handleCreateOrderProduct } from '../../redux/reducers/orderReducer';
 
 function Dashboard({ web3, user, products, cart, account }) {
     const dispatch = useDispatch();
@@ -63,6 +64,7 @@ function Dashboard({ web3, user, products, cart, account }) {
     const handCLickPaid = async (item) => {
         dispatch(setLoadingTrue());
         try {
+            const productsId = [item._id];
             await web3Data.itemManager.methods
                 .triggerPayment(item.indexProduct)
                 .send({
@@ -71,6 +73,15 @@ function Dashboard({ web3, user, products, cart, account }) {
                     from: web3Data.accounts[0],
                     // gas: 600000,
                 });
+            dispatch(
+                handleCreateOrderProduct({
+                    userId: user._id,
+                    orderPrice: +item.price,
+                    orderStatus: +item.status,
+                    userAddress: user.wallet,
+                    productsId,
+                }),
+            );
             dispatch(updateStatusProductApi({ ...item, status: 1 }));
         } catch (e) {
             console.log(e);
